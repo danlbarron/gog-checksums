@@ -2,12 +2,12 @@ GOG Checksum Tool
 ---
 This script will use the [GOG API](https://gogapidocs.readthedocs.io/en/latest) to download a list of checksums for a given game/product installer.
 
-## Dependencies
+### Dependencies
 * Bash Shell (or derivative)
 * Curl
 * Python 3
 
-## Usage
+### Usage
 To run the script, you'll need both a product id and a API bearer token.
 
 The product id can easily be obtained by searching [GOG DB](https://www.gogdb.org). Let's say we want to download the checksums for *Resident Evil 3*. We can search GOG DB and eventually we'll find this [page](https://www.gogdb.org/product/1266089300), which the product id can either be grabbed from the URL or directly from the table contents listed front and center. Hint, the product id in this case will be ***1266089300***.
