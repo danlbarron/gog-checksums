@@ -33,7 +33,7 @@ for downlink in "${downlinks[@]}"; do
   status=$(tail -c-4 <<< "$response")
 
   if [ $status = 401 ]; then
-    echo -e "${RED}Bearer Token: Expired${NOCOLOR}"
+    echo -e "${RED}Bearer Token: Expired or Invalid${NOCOLOR}"
     exit 1
   fi
 
