@@ -18,6 +18,8 @@ stty echo
 
 rm $productid.md5 > /dev/null 2>&1
 
+isMD5FileCreated=0
+
 script="import json, os, sys; "
 script+="downloads = json.load(sys.stdin)['downloads']; "
 script+="downlinks = [file['downlink'] for keys in downloads for key in downloads[keys] for file in key['files']]; "
@@ -37,7 +39,7 @@ for downlink in "${downlinks[@]}"; do
     exit 1
   fi
 
-  if [ $status = 403 ]; then
+  if [ $status = 403 ] || [ $status = 404 ]; then
     # There's nothing we can do, so we should just continue down the list
     continue
   fi
@@ -53,6 +55,14 @@ for downlink in "${downlinks[@]}"; do
   script+="print(f'{root.attrib['md5']} *{root.attrib['name']}')"
 
   curl -f -s $checksumLink | python3 -c "$script" >> $productid.md5
+
+  if [ $isMD5FileCreated = 0 ]; then
+    isMD5FileCreated=1
+  fi
 done
 
-echo $productid.md5: Created
+if [ $isMD5FileCreated = 1 ]; then
+  echo $productid.md5: Created
+else
+  echo $productid.md5: Not Created - No Checksums Found
+fi
