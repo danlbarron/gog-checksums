@@ -32,13 +32,13 @@ which is where I would also copy this script into.
 
 To use this script
 ``` bash
+# Run the script and pass the product id as the argument
 ./gogchecksums.sh 1266089300
 # You'll be prompted for a bearer token, just copy and paste it.
-# Bearer Tokens aren't displayed for security purposes.
 # Once the script completes, it'll output 1266089300.md5: Created.
 
 # You can take that md5 file and check it against installers.
-# Each file that has a corresponding checksum should display something like, 
-# setup_resident_evil_3_1.0_hotfix3(78559).exe: OK, if the check passes.
 md5sum -c 1266089300.md5
+# This will go through the list and for each entry should display something
+# like, setup_resident_evil_3_1.0_hotfix3(78559).exe: OK, if the check passes.
 ```

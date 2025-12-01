@@ -1,21 +1,58 @@
 # SPDX-FileCopyrightText: 2025-2025 Danl Barron
 # SPDX-License-Identifier: MIT
 
-if [ -z ${1+x} ]; then echo 'product id is required as an argument'; exit; fi
+RED='\033[0;31m'
+NOCOLOR='\033[0m'
+
+if [ -z ${1+x} ]; then
+  echo -e "${RED}Product Id: Required argument${NOCOLOR}"
+  exit 1
+fi
+
 productid=$1
 
 stty -echo
-read -s -p 'Bearer Token: ' token; echo
+read -s -p 'Bearer Token: ' token
+echo -e "\b\b\b\b\b\b\b\b\b\b\b\b\b\bDownloading Checksums"
 stty echo
 
 rm $productid.md5 > /dev/null 2>&1
 
-readarray -t downlinks < <(curl -s https://api.gog.com/products/$productid?expand=downloads | python3 -c "import json, os, sys; downloads = json.load(sys.stdin)['downloads']; print(os.linesep.join([file['downlink'] for keys in downloads for key in downloads[keys] for file in key['files']]))")
+script="import json, os, sys; "
+script+="downloads = json.load(sys.stdin)['downloads']; "
+script+="downlinks = [file['downlink'] for keys in downloads for key in downloads[keys] for file in key['files']]; "
+script+="print(os.linesep.join(downlinks))"
+
+readarray -t downlinks < <( \
+  curl -s https://api.gog.com/products/$productid?expand=downloads | \
+    python3 -c "$script")
 
 for downlink in "${downlinks[@]}"; do
-  readarray -t details < <(curl -s -X GET --oauth2-bearer $token $downlink | python3 -c "import json, sys; files = json.load(sys.stdin); print(files['downlink']); print(files['checksum'])")
+  response=$(curl -s -w "%{http_code}" -X GET --oauth2-bearer $token $downlink)
+  content=$(head -c-4 <<< "$response")
+  status=$(tail -c-4 <<< "$response")
 
-  curl -f -s ${details[1]} | python3 -c "import sys, xml.etree.ElementTree as ET; root = ET.fromstring(sys.stdin.read()); print(f'{root.attrib['md5']} *{root.attrib['name']}')" >> $productid.md5
+  if [ $status = 401 ]; then
+    RED='\033[0;31m'
+    echo -e "${RED}Bearer Token: Expired${NOCOLOR}"
+    exit 1
+  fi
+
+  if [ $status = 403 ]; then
+    # There's nothing we can do, so we should just continue down the list
+    continue
+  fi
+
+  script="import json, sys; "
+  script+="files = json.load(sys.stdin); "
+  script+="print(files['checksum'])"
+  checksumLink=$(echo $content | python3 -c "$script")
+
+  script="import sys, xml.etree.ElementTree as ET; "
+  script+="root = ET.fromstring(sys.stdin.read()); "
+  script+="print(f'{root.attrib['md5']} *{root.attrib['name']}')"
+
+  curl -f -s $checksumLink | python3 -c "$script" >> $productid.md5
 done
 
 echo $productid.md5: Created
