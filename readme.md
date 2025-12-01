@@ -21,9 +21,9 @@ and center. Hint, the product id in this case will be ***1266089300***.
 The bearer token can be obtained by logging into [GOG](https://www.gog.com) via 
 a desktop web browser (I.E., Mozilla Firefox), opening the Web Developer Tools, 
 navigating to a Local Storage viewer, and searching within the scope of 
-https://www.gog.com for ***token***; at of the time of writing, the key is 
+https://www.gog.com for *token*; at of the time of writing, the key is 
 *dataClient_menuData* and within the corresponding json value, there's a value 
-for *accessToken*, which is the bearer token you'll need. Bearer Tokens have a 
+for ***accessToken***, which is the bearer token you'll need. Bearer Tokens have a 
 limited lifetime, something like an hour or so, so be prepared to fetch a new 
 bearer token each time you use this script.
 
