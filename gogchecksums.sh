@@ -45,6 +45,7 @@ for downlink in "${downlinks[@]}"; do
   script="import json, sys; "
   script+="files = json.load(sys.stdin); "
   script+="print(files['checksum'])"
+
   checksumLink=$(echo $content | python3 -c "$script")
 
   script="import sys, xml.etree.ElementTree as ET; "
